@@ -11,12 +11,12 @@ services:
     env_file: .prod.env
     depends_on:
       - s3server
-  s3server:
+   s3server:
     image: minio/minio
     ports:
       - "9000:9000"
+      - "9001:9001"
     volumes:
       - ./storage/minio:/data
     env_file: .prod.env
-    command: server --console-address :9000 /data
-    
+    command: server --console-address :9001 /data
