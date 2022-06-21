@@ -1,19 +1,22 @@
 services:
   web-server:
-    image: sthomasch/ishlearn
+    image: sthomasch/ishlearn # Optional: select preview tag with :preview-[branchname]
     restart: unless-stopped
     ports:
       - '80:80' # Map local PORT 80 to docker port 80
     environment: # Configure ENV
       PORT: 80
       REDIS_URL: 'redis:6379' # not present for ARM architecture
-      S3_ENDPOINT: 's3server:8000'
+      S3_ENDPOINT: 's3server:9000'
     env_file: .prod.env
     depends_on:
       - s3server
   s3server:
-    image: scality/s3server
-    restart: unless-stopped
+    image: minio/minio
     ports:
-      - '8000:8000'
+      - "9000:9000"
+    volumes:
+      - ./storage/minio:/data
     env_file: .prod.env
+    command: server --console-address :9000 /data
+    
