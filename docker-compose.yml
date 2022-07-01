@@ -3,23 +3,36 @@ services:
     image: sthomasch/ishlearn
     restart: unless-stopped
     ports:
-      - '80:80' # Map local PORT 80 to docker port 80
+      - '1548:1548' # Map local PORT 80 to docker port 80
     environment: # Configure ENV
-      PORT: 80
+      PORT: 1548
+      DB_CONNECTION_HOST: 'db'
       REDIS_URL: 'redis:6379'
-      S3_ENDPOINT: 's3server:8000'
+      S3_ENDPOINT: 'http://s3server:9000'
     env_file: .prod.env
     depends_on:
+      - db
       - redis
       - s3server
+  db:
+    image: mysql:latest
+    restart: unless-stopped
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./storage/mysql:/var/lib/mysql
+    env_file: .prod.env
   redis:
     image: redislabs/redismod:preview
     restart: unless-stopped
     ports:
       - '6379:6379'
   s3server:
-    image: scality/s3server
-    restart: unless-stopped
+    image: minio/minio
     ports:
-      - '8000:8000'
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - ./storage/minio:/data
     env_file: .prod.env
+    command: server --console-address :9001 /data
